@@ -1,5 +1,8 @@
-# Берем образ с полноценным графическим рабочим столом (LXDE) и доступом через браузер
+# Берем образ с полноценным графическим рабочим столом (LXDE)
 FROM dorowu/ubuntu-desktop-lxde-vnc:focal
+
+# ИСПРАВЛЕНИЕ: Удаляем сломанный репозиторий Google Chrome, из-за которого крашится сборка
+RUN rm -f /etc/apt/sources.list.d/google*.list
 
 # Устанавливаем базовые программы и .NET 8.0
 RUN apt-get update && apt-get install -y wget apt-transport-https && \
