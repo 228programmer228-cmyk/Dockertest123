@@ -1,24 +1,17 @@
-# Берем образ сразу с .NET 8.0
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+# Берем образ с полноценным графическим рабочим столом (LXDE) и доступом через браузер
+FROM dorowu/ubuntu-desktop-lxde-vnc:focal
 
-# Устанавливаем базовые проги для "VPS"
-RUN apt-get update && apt-get install -y \
-    tmux nano htop wget curl unzip sudo \
-    && rm -rf /var/lib/apt/lists/*
+# Устанавливаем базовые программы и .NET 8.0
+RUN apt-get update && apt-get install -y wget apt-transport-https && \
+    wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get install -y dotnet-sdk-8.0
 
-# Устанавливаем Web-терминал (ttyd)
-RUN wget https://github.com/tsl0922/ttyd/releases/download/1.7.4/ttyd.x86_64 -O /usr/local/bin/ttyd \
-    && chmod +x /usr/local/bin/ttyd
+# Скачиваем Playit.gg
+RUN wget https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64 -O /usr/local/bin/playit && \
+    chmod +x /usr/local/bin/playit
 
-# Сразу закидываем Playit.gg
-RUN wget https://github.com/playit-cloud/playit-agent/releases/latest/download/playit-linux-amd64 -O /usr/local/bin/playit \
-    && chmod +x /usr/local/bin/playit
-
-# Рабочая папка
-WORKDIR /root
-
-# Указываем Zeabur, что терминал будет работать на порту 8080
-EXPOSE 8080
-
-# ВОТ ТУТ ИСПРАВЛЕНО (добавлен пробел после CMD)
-CMD["ttyd", "-p", "8080", "-W", "tmux", "new", "-s", "vps"]
+# Рабочий стол будет доступен по стандартному веб-порту
+EXPOSE 80
